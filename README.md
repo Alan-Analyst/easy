@@ -114,3 +114,56 @@ function x = gauss(A, b, x0, maxIter, tol)
     warning('Maximum iterations reached without convergence.');
 end
 
+function table = simpleForwardDiff(x, y)
+    % SIMPLEFORWARDDIFF creates a forward difference table
+    % x - list of x values (equally spaced)
+    % y - list of f(x) values
+
+    n = length(y);
+    table = zeros(n, n);      % Make an n x n table
+    table(:,1) = y(:);        % First column = original y values
+
+    % Fill in the difference columns
+    for col = 2:n
+        for row = 1:n-col+1
+            table(row, col) = table(row+1, col-1) - table(row, col-1);
+        end
+    end
+end
+
+function NR(f, g, x0, y0, iter)
+syms x
+syms y
+
+
+fx = diff(f, x);
+fy = diff(f, y);
+gx = diff(g, x);
+gy = diff(g, y);
+
+J = fx*gy-fy*gx;
+
+if subs(J, {x, y}, {x0, y0}) == 0
+    error('division by zero')
+else 
+    x1 = x0 - (subs(g*fy-f*gy, {x, y}, {x0, y0})/subs(J, {x, y}, {x0, y0}));
+    y1 = y0 - (subs(g*fx-f*gx, {x, y}, {x0, y0}))/subs(J, {x, y}, {x0, y0});
+    solution_vector = zeros(iter, 2);  % Preallocate for speed
+
+
+    for i=1:iter
+
+        x0 = x1;
+        y0 = y1;     
+        x1 = x0 - (subs(g*fy-f*gy, {x, y}, {x0, y0})/subs(J, {x, y}, {x0, y0}));
+        y1 = y0 - (subs(g*fx-f*gx, {x, y}, {x0, y0}))/subs(J, {x, y}, {x0, y0});
+        solution_vector(i, :) = [double(x1), double(y1)];
+
+
+
+    end
+    
+    disp(solution_vector)
+
+end
+
